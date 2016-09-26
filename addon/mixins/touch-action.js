@@ -59,31 +59,33 @@ export default Mixin.create({
       shouldApplyStyle = isFocusable;
     }
 
-    if (hasClickHandler || shouldApplyStyle) {
-      let newAttributeBindings = [];
-      const bindings = get(this, 'attributeBindings');
+    if(this.tagName || this.elementId) {
+      if (hasClickHandler || shouldApplyStyle) {
+        let newAttributeBindings = [];
+        const bindings = get(this, 'attributeBindings');
 
-      // don't override other style bindings if present
-      if (Array.isArray(bindings)) {
-        bindings.forEach((binding) => {
-          if (binding === 'style') {
-            this.otherStyleKey = binding;
-          } else {
-            let end = binding.length - 6;
+        // don't override other style bindings if present
+        if (Array.isArray(bindings)) {
+          bindings.forEach((binding) => {
+            if (binding === 'style') {
+              this.otherStyleKey = binding;
+            } else {
+              let end = binding.length - 6;
 
-            if (end > 0 && ':style' === binding.substring(end)) {
-              this.otherStyleKey = binding.substring(0, end);
+              if (end > 0 && ':style' === binding.substring(end)) {
+                this.otherStyleKey = binding.substring(0, end);
+              }
             }
-          }
-        });
-        newAttributeBindings = newAttributeBindings.concat(bindings);
+          });
+          newAttributeBindings = newAttributeBindings.concat(bindings);
+        }
+
+        newAttributeBindings.push('touchActionStyle:style');
+        this.set('attributeBindings', newAttributeBindings);
+
+        let desc = this.otherStyleKey ? computed(this.otherStyleKey, touchActionStyle) : computed(touchActionStyle);
+        defineProperty(this, 'touchActionStyle', desc);
       }
-
-      newAttributeBindings.push('touchActionStyle:style');
-      this.set('attributeBindings', newAttributeBindings);
-
-      let desc = this.otherStyleKey ? computed(this.otherStyleKey, touchActionStyle) : computed(touchActionStyle);
-      defineProperty(this, 'touchActionStyle', desc);
     }
   },
 });
